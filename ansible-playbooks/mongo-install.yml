@@ -1,0 +1,46 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+    - name: Install gnupg and curl
+      apt:
+        name:
+          - gnupg
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Download MongoDB public GPG key
+      ansible.builtin.get_url:
+        url: https://www.mongodb.org/static/pgp/server-7.0.asc
+        dest: /tmp/mongodb-server-7.0.asc
+        mode: '0644'
+
+    - name: Add MongoDB public GPG key
+      ansible.builtin.command: >
+        gpg --no-default-keyring --keyring /usr/share/keyrings/mongodb-server-7.0.gpg --import /tmp/mongodb-server-7.0.asc
+      args:
+        creates: /usr/share/keyrings/mongodb-server-7.0.gpg
+
+    - name: Create MongoDB source list
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/mongodb-org-7.0.list
+        content: |
+          deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] http://repo.mongodb.org/apt/debian bullseye/mongodb-org/7.0 main
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Reload local package database
+      apt:
+        update_cache: yes
+
+    - name: Install the latest version of MongoDB
+      apt:
+        name: mongodb-org
+        state: present
+
+    - name: Clean up the temporary GPG key file
+      ansible.builtin.file:
+        path: /tmp/mongodb-server-7.0.asc
+        state: absent

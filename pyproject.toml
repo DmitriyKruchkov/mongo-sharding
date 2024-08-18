@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "mongodb-sharding"
+version = "0.1.0"
+description = ""
+authors = ["DmitriyKryuchkov"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-terraform = "^0.10.1"
+ansible = "^10.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

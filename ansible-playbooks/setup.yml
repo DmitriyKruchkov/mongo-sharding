@@ -1,0 +1,65 @@
+---
+- hosts: shard_servers
+  become: yes
+  tasks:
+    - name: Create MongoDB config file for shard servers
+      template:
+        src: templates/mongod_shard.conf.j2
+        dest: /etc/mongod.conf
+        owner: mongodb
+        group: mongodb
+        mode: '0644'
+      notify: restart mongod
+
+    - name: Enable and start MongoDB
+      systemd:
+        name: mongod
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart mongod
+      systemd:
+        name: mongod
+        state: restarted
+
+- hosts: config
+  become: yes
+  tasks:
+    - name: Create MongoDB config file for config servers
+      template:
+        src: templates/mongod.conf.j2
+        dest: /etc/mongod.conf
+        owner: mongodb
+        group: mongodb
+        mode: '0644'
+      notify: restart mongod
+
+    - name: Enable and start MongoDB
+      systemd:
+        name: mongod
+        enabled: yes
+        state: started
+
+  handlers:
+    - name: restart mongod
+      systemd:
+        name: mongod
+        state: restarted
+
+- hosts: mongos
+  become: yes
+  tasks:
+    - name: Create MongoDB config file for mongos servers
+      template:
+        src: templates/mongos.conf.j2
+        dest: /etc/mongos.conf
+        owner: mongodb
+        group: mongodb
+        mode: '0644'
+
+    - name: Enable and start MongoDB mongos
+      systemd:
+        name: mongos
+        enabled: yes
+        state: started

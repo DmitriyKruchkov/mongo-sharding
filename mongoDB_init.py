@@ -1,15 +1,21 @@
 import python_terraform
-import re
+# from ansible import context, vars
+# from ansible.cli import CLI
+# from ansible.executor.playbook_executor import PlaybookExecutor
+from utils import create_ssh_keys, clear_address
 
-t = python_terraform.Terraform()
 
-# t.init()
+t = python_terraform.Terraform(working_dir="terraform")
+
+t.init()
 
 code, stdout, stderr = t.apply(skip_plan=True)
-
 output_list = stdout.split("Outputs:")[-1].split()
-router_ip = output_list[2].replace('"', '')
-shards_ips = [i.replace('"', '') for i in output_list[5:]]
-print(router_ip)
-print(shards_ips)
+print(output_list)
+addrs = [clear_address(i) for i in output_list[3:-1]]
+router_addr = addrs[0]
+config_addr, shards_addr = addrs[1], addrs[2:]
 
+# playbook_path = "./playbook.yml"
+# playbook = PlaybookExecutor(playbooks=[playbook_path])
+# playbook.run()
